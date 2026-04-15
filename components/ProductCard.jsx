@@ -12,8 +12,8 @@ export default function ProductCard({ product }) {
   const [showToast, setShowToast] = useState(false)
 
   // Find item in cart and get its quantity (qty)
-  const cartItem = cart.find(item => item.id === product.id)
-  const qty = cartItem?.qty || 0
+  const cartItem = cart.find((item) => item.id === product.id);
+  const qty = cartItem?.qty || 0;
 
   const handleAddToCart = () => {
     addToCart(product)
