@@ -1,3 +1,4 @@
+import { SessionProvider } from "next-auth/react"
 import type { Metadata } from "next";
 //import { Geist, Geist_Mono, Inter } from "next/font/google";
 import Navigation from "@/components/Navigation";
