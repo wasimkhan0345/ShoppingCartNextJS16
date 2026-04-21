@@ -1,7 +1,7 @@
-import { SessionProvider } from "next-auth/react"
 import type { Metadata } from "next";
 //import { Geist, Geist_Mono, Inter } from "next/font/google";
 import Navigation from "@/components/Navigation";
+import AuthProvider from "@/components/AuthProvider";
 import localFont from "next/font/local";
 
 import "./globals.css";
@@ -54,10 +54,12 @@ export default function RootLayout({
       className={`${roboto.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <CartProvider>
-          <Navigation />
-          {children}
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Navigation />
+            {children}
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

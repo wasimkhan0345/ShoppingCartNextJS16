@@ -1,5 +1,4 @@
 import Image from "next/image";
-//import styles from "./styles/cart.module.css";
 
 export default function Home() {
   return (
