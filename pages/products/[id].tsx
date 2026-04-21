@@ -1,5 +1,3 @@
-"use client"
-
 import { useParams } from "next/navigation"
 import { products } from "@/data/products";
 import Image from "next/image"
