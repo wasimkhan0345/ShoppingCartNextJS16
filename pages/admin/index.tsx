@@ -12,16 +12,30 @@ type Props = {
 
 export default function AdminDashboard({ products: initialProducts }: Props) {
   const [products, setProducts] = useState(initialProducts);
-  const [form, setForm] = useState({ name: "", price: "", description: "", imageUrl: "" });
+  const [form, setForm] = useState(
+    { 
+      name: "", 
+      price: "", 
+      description: "", 
+      imageUrl: null as File | null,
+      imagePreview: "", // data URL for preview
+    }
+  );
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    const formData = new FormData();
+    if(form.imageUrl) {
+      formData.append("image", form.imageUrl);
+    }
+
     const res = await fetch("/api/admin/products", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "multipart/form-data" },
       body: JSON.stringify({
         name: form.name,
         price: parseFloat(form.price),
@@ -32,7 +46,7 @@ export default function AdminDashboard({ products: initialProducts }: Props) {
     if (res.ok) {
       const newProduct = await res.json();
       setProducts([newProduct, ...products]);
-      setForm({ name: "", price: "", description: "", imageUrl: "" });
+      setForm({ name: "", price: "", description: "", imageUrl: null, imagePreview: "" });
     } else {
       alert("Failed to add product");
     }
@@ -46,6 +60,29 @@ export default function AdminDashboard({ products: initialProducts }: Props) {
       setProducts(products.filter(p => p.id !== id));
     } else {
       alert("Delete failed");
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent <HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if(file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm( (prev) => ({
+          ...prev,
+          imageUrl: file,
+          imagePreview: reader.result as string,
+        }));
+      }
+      reader.readAsDataURL(file);
+    }
+    else {
+      setForm( (prev) => ( {
+        ...prev, 
+        imageUrl: null,
+        imagePreview: ""
+      }))
     }
   };
 
@@ -83,12 +120,15 @@ export default function AdminDashboard({ products: initialProducts }: Props) {
               rows={2}
             />
             <input
-              type="text"
-              placeholder="Image URL (optional)"
-              value={form.imageUrl}
-              onChange={e => setForm({ ...form, imageUrl: e.target.value })}
-              className="col-span-2 px-3 py-2 border rounded"
+              type="file"
+              onChange={handleFileChange}
+              className="col-span-2 px-3 py-2 border rounded" 
+              accept="image/*"
             />
+            {/* Optional: show preview */}
+            {form.imagePreview && (
+              <img src={form.imagePreview} alt="Preview" className="mt-2 w-32 h-32 object-cover" />
+            )}
           </div>
           <button
             type="submit"
