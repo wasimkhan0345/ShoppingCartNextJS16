@@ -6,12 +6,15 @@ import { Product } from "@prisma/client";
 import { useState } from "react";
 import { useRouter } from "next/router";
 
+import Image from "next/image";
+
 type Props = {
   products: Product[];
 };
 
 export default function AdminDashboard({ products: initialProducts }: Props) {
   const [products, setProducts] = useState(initialProducts);
+
   const [form, setForm] = useState(
     { 
       name: "", 
@@ -132,7 +135,7 @@ export default function AdminDashboard({ products: initialProducts }: Props) {
             />
             {/* Optional: show preview */}
             {form.imagePreview && (
-              <img src={form.imagePreview} alt="Preview" className="mt-2 w-32 h-32 object-cover" />
+              <Image src={form.imagePreview} alt="Preview" className="mt-2 w-32 h-32 object-cover" />
             )}
           </div>
           <button
@@ -148,11 +151,12 @@ export default function AdminDashboard({ products: initialProducts }: Props) {
       {/* Product List */}
       <section>
         <h2 className="text-xl font-semibold mb-3">All Products</h2>
-        <table className="w-full border">
+        <table className="w-full border-collapse shadow">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-2 text-left">Name</th>
               <th className="p-2 text-left">Price</th>
+              <th className="p-2 text-left">Image</th>
               <th className="p-2 text-left">Actions</th>
             </tr>
           </thead>
@@ -161,16 +165,25 @@ export default function AdminDashboard({ products: initialProducts }: Props) {
               <tr key={product.id} className="border-t">
                 <td className="p-2">{product.name}</td>
                 <td className="p-2">${product.price.toFixed(2)}</td>
+                <td className="p-2">
+                  <div className="relative w-38 h-28">
+                    {product.imageUrl ? (
+                      <Image src={product.imageUrl} alt={product.name} fill className="object-cover" />
+                    ) : (
+                      "No Image"
+                    )}
+                  </div>
+                </td>
                 <td className="p-2 space-x-2">
                   <button
                     onClick={() => router.push(`/admin/products/${product.id}/edit`)}
-                    className="text-blue-600 hover:underline"
+                    className="text-blue-600 hover:underline px-2 py-1 border rounded"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(product.id)}
-                    className="text-red-600 hover:underline"
+                    className="text-red-600 hover:underline px-2 py-1 border rounded"
                   >
                     Delete
                   </button>
