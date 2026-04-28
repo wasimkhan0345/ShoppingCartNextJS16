@@ -29,19 +29,24 @@ export default function AdminDashboard({ products: initialProducts }: Props) {
     setLoading(true);
 
     const formData = new FormData();
+    
+    if(form.name) {
+      formData.append("name", form.name);
+    }
+    if(form.price) {
+      formData.append("price", parseFloat(form.price).toString());
+    }
+    if(form.description) {
+      formData.append("description", form.description);
+    }
     if(form.imageUrl) {
       formData.append("image", form.imageUrl);
     }
 
     const res = await fetch("/api/admin/products", {
       method: "POST",
-      headers: { "Content-Type": "multipart/form-data" },
-      body: JSON.stringify({
-        name: form.name,
-        price: parseFloat(form.price),
-        description: form.description,
-        imageUrl: form.imageUrl,
-      }),
+//      headers: { "Content-Type": "multipart/form-data" },
+      body: formData,
     });
     if (res.ok) {
       const newProduct = await res.json();
