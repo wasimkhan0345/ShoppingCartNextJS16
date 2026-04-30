@@ -6,7 +6,9 @@ import { Product } from "@prisma/client";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-type Props = { product: Product };
+type Props = {
+  product: Product;
+};
 
 export default function EditProduct({ product }: Props) {
   const router = useRouter();
@@ -18,9 +20,20 @@ export default function EditProduct({ product }: Props) {
   });
   const [loading, setLoading] = useState(false);
 
+    const handleFileChange = (e: React.ChangeEvent <HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+
+      if(file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        
+        reader.readAsDataURL(file);
+      }
+    };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
     const res = await fetch(`/api/admin/products/${product.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -31,10 +44,12 @@ export default function EditProduct({ product }: Props) {
         imageUrl: form.imageUrl,
       }),
     });
+
     if (res.ok) {
       router.push("/admin");
     } else {
-      alert("Update failed");
+      const errorData = await res.json().catch(() => ({}));
+      alert(errorData.message || "Update failed");
     }
     setLoading(false);
   };
@@ -47,7 +62,7 @@ export default function EditProduct({ product }: Props) {
           type="text"
           placeholder="Name"
           value={form.name}
-          onChange={e => setForm({ ...form, name: e.target.value })}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
           required
           className="w-full px-3 py-2 border rounded"
         />
@@ -56,29 +71,28 @@ export default function EditProduct({ product }: Props) {
           step="0.01"
           placeholder="Price"
           value={form.price}
-          onChange={e => setForm({ ...form, price: e.target.value })}
+          onChange={(e) => setForm({ ...form, price: e.target.value })}
           required
           className="w-full px-3 py-2 border rounded"
         />
         <textarea
           placeholder="Description"
           value={form.description}
-          onChange={e => setForm({ ...form, description: e.target.value })}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
           className="w-full px-3 py-2 border rounded"
           rows={3}
         />
         <input
-          type="text"
-          placeholder="Image URL"
-          value={form.imageUrl}
-          onChange={e => setForm({ ...form, imageUrl: e.target.value })}
-          className="w-full px-3 py-2 border rounded"
-        />
+              type="file"
+              onChange={handleFileChange}
+              className="col-span-2 px-3 py-2 border rounded" 
+              accept="image/*"
+            />
         <div className="flex gap-3">
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50"
           >
             {loading ? "Saving..." : "Save Changes"}
           </button>
@@ -97,13 +111,31 @@ export default function EditProduct({ product }: Props) {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getSession(context);
-  if (!session || session.user.role !== "admin") {
-    return { redirect: { destination: "/login", permanent: false } };
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
   }
 
-  const { id } = context.params!;
-  const product = await prisma.product.findUnique({ where: { id: String(id) } });
-  if (!product) return { notFound: true };
+  const { id } = context.params as { id: string };
 
-  return { props: { product: JSON.parse(JSON.stringify(product)) } };
+  const product = await prisma.product.findUnique({
+    where: { id },
+  });
+
+  if (!product) {
+    return {
+      notFound: true,
+    };
+  }
+
+  return {
+    props: {
+      product: JSON.parse(JSON.stringify(product)),
+    },
+  };
 };
