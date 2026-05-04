@@ -2,10 +2,12 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useCart } from "@/context/CartContext"
+import { signOut, useSession } from "next-auth/react"
 
 export default function Navigation() {
   const { cart, cartCount } = useCart()
   const [showCart, setShowCart] = useState(false)
+  const { data: session } = useSession()
 
   return (
     <nav className="sticky top-0 z-50 bg-white shadow-md px-6 py-4">
@@ -93,6 +95,17 @@ export default function Navigation() {
               </div>
             )}
           </li>
+          {session && (
+            <li>
+              <button 
+                onClick={() => signOut({
+                  callbackUrl: "/login"
+                })}
+              >
+                Sign out
+              </button>
+            </li>
+          )}
         </ul>
 
       </div>

@@ -16,33 +16,32 @@ export default function EditProduct({ product }: Props) {
     name: product.name,
     price: product.price.toString(),
     description: product.description || "",
-    imageUrl: product.imageUrl || "",
+    // Keep existing imageUrl for display, but not for submission
+    existingImageUrl: product.imageUrl || "",
+    imagePreview: "", // data URL for preview only
   });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // store the actual file
   const [loading, setLoading] = useState(false);
-
-    const handleFileChange = (e: React.ChangeEvent <HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-
-      if(file && file.type.startsWith("image/")) {
-        const reader = new FileReader();
-        
-        reader.readAsDataURL(file);
-      }
-    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
+    const formData = new FormData();
+    
+    // Append text fields
+    if (form.name) formData.append("name", form.name);
+    if (form.price) formData.append("price", parseFloat(form.price).toString());
+    if (form.description) formData.append("description", form.description);
+    
+    // Append the actual file if a new one was selected
+    if (selectedFile) {
+      formData.append("image", selectedFile); // ✅ key must match backend: 'image'
+    }
+
     const res = await fetch(`/api/admin/products/${product.id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: form.name,
-        price: parseFloat(form.price),
-        description: form.description,
-        imageUrl: form.imageUrl,
-      }),
+      body: formData, // ✅ Do NOT set Content-Type header
     });
 
     if (res.ok) {
@@ -52,6 +51,25 @@ export default function EditProduct({ product }: Props) {
       alert(errorData.message || "Update failed");
     }
     setLoading(false);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      setSelectedFile(file); // store the actual file
+      // Generate preview for UI only
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm((prev) => ({
+          ...prev,
+          imagePreview: reader.result as string,
+        }));
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setSelectedFile(null);
+      setForm((prev) => ({ ...prev, imagePreview: "" }));
+    }
   };
 
   return (
@@ -82,12 +100,28 @@ export default function EditProduct({ product }: Props) {
           className="w-full px-3 py-2 border rounded"
           rows={3}
         />
+        
+        {/* Show current image preview */}
+        {form.existingImageUrl && !form.imagePreview && (
+          <div>
+            <p className="text-sm text-gray-600">Current image:</p>
+            <img src={form.existingImageUrl} alt="Current" className="h-20 w-20 object-cover" />
+          </div>
+        )}
+        {form.imagePreview && (
+          <div>
+            <p className="text-sm text-gray-600">New image preview:</p>
+            <img src={form.imagePreview} alt="Preview" className="h-20 w-20 object-cover" />
+          </div>
+        )}
+        
         <input
-              type="file"
-              onChange={handleFileChange}
-              className="col-span-2 px-3 py-2 border rounded" 
-              accept="image/*"
-            />
+          type="file"
+          onChange={handleFileChange}
+          className="col-span-2 px-3 py-2 border rounded" 
+          accept="image/*"
+        />
+        
         <div className="flex gap-3">
           <button
             type="submit"

@@ -2,6 +2,24 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
+import { getSession } from "next-auth/react"
+
+export async function getServerSideProps(context:any) {
+  const session = await getSession(context);
+
+  if (session) {
+    // Already logged in – redirect to dashboard or home
+    return {
+      redirect: {
+        destination: "/admin",
+        permanent: false
+      }
+    }
+  }
+
+  // Not logged in – show login page normally
+  return { props: {} };
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
