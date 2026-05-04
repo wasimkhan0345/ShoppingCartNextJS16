@@ -135,7 +135,11 @@ export default function AdminDashboard({ products: initialProducts }: Props) {
             />
             {/* Optional: show preview */}
             {form.imagePreview && (
-              <Image src={form.imagePreview} alt="Preview" className="mt-2 w-32 h-32 object-cover" />
+              <img
+                src={form.imagePreview}
+                alt="Preview"
+                className="mt-2 w-32 h-32 object-cover rounded"
+              />
             )}
           </div>
           <button
