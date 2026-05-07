@@ -37,7 +37,7 @@ export default function ProductCard({ product }) {
     <div className="card">
         <div className="imageWrapper" >
             <Image 
-                src={product.image} 
+                src={product.imageUrl} 
                 alt={product.name} 
                 fill
                 className="productImage" 

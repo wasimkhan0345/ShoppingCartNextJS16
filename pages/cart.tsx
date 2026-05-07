@@ -1,5 +1,6 @@
 import Image from "next/image"
 import { useCart } from "@/context/CartContext"
+import Link from "next/link"
 
 export default function CartPage() {
   const { cart, removeFromCart } = useCart()
@@ -31,7 +32,7 @@ export default function CartPage() {
                 {/* Product Image */}
                 <div className="w-24 h-24 relative flex-shrink-0">
                   <Image
-                    src={item.image} // 👈 make sure you store image in cart
+                    src={item.imageUrl} // 👈 make sure you store image in cart
                     alt={item.name}
                     fill
                     className="object-cover rounded-md"
@@ -54,6 +55,7 @@ export default function CartPage() {
                 >
                   Remove
                 </button>
+
               </div>
             ))}
           </div>
@@ -72,9 +74,12 @@ export default function CartPage() {
               <span className="font-bold">Rs. {total}</span>
             </div>
 
-            <button className="w-full bg-black text-white py-3 rounded-md hover:bg-gray-800 transition">
+            <Link 
+              href="/checkout" 
+              className="w-full bg-black text-white px-3 py-3 rounded-md hover:bg-gray-800 transition"
+            >
               Proceed to Checkout
-            </button>
+            </Link>
           </div>
 
         </div>

@@ -58,7 +58,7 @@ export default function Navigation() {
                         {/* Image */}
                         <div className="relative w-12 h-12">
                           <Image
-                            src={item.image}
+                            src={item.imageUrl}
                             alt={item.name}
                             fill
                             className="object-cover rounded"

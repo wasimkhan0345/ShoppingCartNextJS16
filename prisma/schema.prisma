@@ -31,3 +31,27 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model Order {
+  id              Int      @id @default(autoincrement())
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  deliveryAddress String
+  totalAmount     Float
+  status          String   @default("pending") // pending, paid, shipped, delivered, cancelled
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id          Int      @id @default(autoincrement())
+  orderId     Int
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String      // reference to product table
+  productName String
+  price       Float
+  quantity    Int
+  imageUrl    String?
+}
