@@ -11,6 +11,7 @@ export default function CheckoutPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    password: "",
     address: "",
     phone: "",
   });
@@ -29,7 +30,7 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     // Simple client-side validation
-    if (!formData.name || !formData.email || !formData.address || !formData.phone) {
+    if (!formData.name || !formData.email || !formData.password || !formData.address || !formData.phone) {
       setError("Please fill in all fields.");
       setIsSubmitting(false);
       return;
@@ -37,7 +38,13 @@ export default function CheckoutPage() {
 
     // Prepare order data
     const orderData = {
-      customer: formData,
+      email: formData.email,
+      password: formData.password,
+      customer: {
+        name: formData.name,
+        phone: formData.phone,
+        address: formData.address,
+      },
       items: cart.map((item) => ({
         productId: item.id,
         name: item.name,
@@ -151,6 +158,13 @@ export default function CheckoutPage() {
                 className="w-full border rounded px-3 py-2"
                 required
               />
+            </div>
+            <div>
+              <label className="block font-medium mb-1">Password</label>
+              <input type="password" name="password" value={formData.password} onChange={handleChange} required className="w-full border rounded px-3 py-2" />
+              <p className="text-xs text-gray-500 mt-1">
+                If this email already exists, we will log you in. Otherwise, a new account will be created.
+              </p>
             </div>
             <div>
               <label className="block font-medium mb-1">Phone</label>

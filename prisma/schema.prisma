@@ -16,10 +16,11 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
-  password  String   // Hashed password
+  password  String // Hashed password
   role      String   @default("user") // "user" or "admin"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  orders    Order[] // 👈 add this line
 }
 
 model Product {
@@ -33,23 +34,25 @@ model Product {
 }
 
 model Order {
-  id              Int      @id @default(autoincrement())
+  id              Int         @id @default(autoincrement())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   customerName    String
   customerEmail   String
   customerPhone   String
   deliveryAddress String
   totalAmount     Float
-  status          String   @default("pending") // pending, paid, shipped, delivered, cancelled
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  status          String      @default("pending") // pending, paid, shipped, delivered, cancelled
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
   items           OrderItem[]
 }
 
 model OrderItem {
-  id          Int      @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   orderId     Int
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId   String      // reference to product table
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String // reference to product table
   productName String
   price       Float
   quantity    Int
